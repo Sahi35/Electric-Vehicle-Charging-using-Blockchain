@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: GPL-3.0 pragma solidity ^0.8.0;
+contract charge_ev { struct Charge {
+address user_id;uint charger_id; uint duration;
+}
+
+address[] usersByAddress;
+
+mapping (bytes32 => Charge) Charges; bytes32[] chargesList;
+
+event chargerId_info(address _add, bytes32 chargeId);
+
+function addNewCustomer(address user_id) public returns (bool success) { usersByAddress.push(user_id);
+return true;
+}
+
+function addNewCharge( address user_id,
+uint charger_id, uint duration
+) public returns (bytes32) {
+
+bytes32 chargeId = sha256(abi.encodePacked(user_id,charger_id)); Charges[chargeId] = Charge(user_id, charger_id, duration);
+
+chargesList.push(chargeId);
+emit chargerId_info(user_id,chargeId);return chargeId;
+}
+address payable ad;
+function pay(address payable _add,uint32 duration) public payable returns(uint)
+{
+uint payAmt; payAmt=msg.value; if(duration<30){
+_add.transfer(msg.value-1e18);
+
+return payAmt-1;
+}
+else{
+_add.transfer(msg.value); return payAmt;
+}
+}
+
+
+function returnDiscount() public payable { address payable _add;
+_add = payable(msg.sender); address payable myAdd; myAdd=payable(address(this));
+_add.transfer(myAdd.balance);
+}
+
+function getUsersList() public view returns (address[] memory)
+{
+return usersByAddress;
+}
+
+function getChargeData(bytes32 chargeId) public view returns (
+uint, uint)
+{
+return (Charges[chargeId].charger_id, Charges[chargeId].duration);
+}
+
+}
